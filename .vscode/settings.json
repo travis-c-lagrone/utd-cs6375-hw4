@@ -55,5 +55,5 @@
 
   "python.workspaceSymbols.enabled": true,
 
-  "vsintellicode.python.completionsEnabled": true
+  "vsintellicode.python.completionsEnabled": true,
 }
