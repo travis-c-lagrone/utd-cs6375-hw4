@@ -5,16 +5,16 @@
 
   "enableTypeIgnoreComments": true,
 
-  "reportCallInDefaultInitializer":    "none",   // Calling a function in a default initializer is not an error, but only a temporally-obscured performance cost.
-  "reportConstantRedefinition":        "error",  // Syntactically permissible, but semantically incorrect.
-  "reportIncompatibleMethodOverride":  "error",  // Syntactically permissible, but semantically incorrect.
-  "reportInvalidStringEscapeSequence": "error",  // Syntactic run-time error, but semantic compile-time error. (Python plans to make it a compile-time error in future versions.)
-  "reportPrivateUsage":                "error",  // Logic run-time error, but semantic compile-time error.
+  "reportCallInDefaultInitializer":    "none",
+  "reportConstantRedefinition":        "error",
+  "reportIncompatibleMethodOverride":  "error",
+  "reportInvalidStringEscapeSequence": "error",
+  "reportPrivateUsage":                "error",
 
-  "reportImportCycles":     "warning",  // Import cycles are not erroneous in Python, but they do often hint at architectural layering issues.
+  "reportImportCycles":     "warning",
   "reportMissingImports":   "error",
-  "reportMissingTypeStubs": "warning",  // Missing type stubs severely impair (albeit don't break) static type checking.
-  "reportTypeshedErrors":   "none",     // GA Typeshed files should be error-free already. This setting is really only intended for homebrew Typeshed files.
+  "reportMissingTypeStubs": "warning",
+  "reportTypeshedErrors":   "none",
 
   "reportOptionalCall":           "error",
   "reportOptionalContextManager": "error",
@@ -41,9 +41,9 @@
   "reportUnusedImport":   "warning",
   "reportUnusedVariable": "warning",
 
-  "strictDictionaryInference": true,  // If a generic TypeVar other than the strictest inference is intended, then it should be explicitly declared.
-  "strictListInference":       true,  // If a generic TypeVar other than the strictest inference is intended, then it should be explicitly declared.
-  "strictParameterNoneValue":  true,  // Requiring parameters with a default value of None to be Optional is necessary for null safety until such time that a "monotonically nonnull" type is supported.
+  "strictDictionaryInference": true,
+  "strictListInference":       true,
+  "strictParameterNoneValue":  true,
 
   "venvPath": ".virtualenvs",
   "venv": "dev"

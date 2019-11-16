@@ -1,0 +1,4 @@
+[flake8]
+docstring_convention = google
+hang_closing = false
+max_doc_length = null
