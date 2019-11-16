@@ -1,0 +1,57 @@
+{
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.classpath": true,
+    "**/.DS_Store": true,
+    "**/.factorypath": true,
+    "**/.git": true,
+    "**/.hg": true,
+    "**/.idea": true,
+    "**/.ipynb_checkpoints": true,
+    "**/.mypy_cache": true,
+    "**/.project": true,
+    "**/.pytest_cache": true,
+    "**/.settings": true,
+    "**/.svn": true,
+    "**/.venv": true,
+    "**/.virtualenvs": true,
+    "**/.vs": true,
+    "**/.vscode/solution-explorer": true,
+    "**/*.code-workspace": true,
+    "**/*.egg-info": true,
+    "**/bin": true,
+    "**/CVS": true,
+    "**/obj": true,
+    "**/out": true,
+    "**/target": true
+  },
+
+  "python.envFile": "${workspaceFolder}/.env",
+  "python.poetryPath": "${POETRY_HOME}",
+  "python.pythonPath": "${workspaceFolder}/.virtualenvs/dev/Scripts/python.exe",
+  "python.venvPath": "${workspaceFolder}/.virtualenvs",
+
+  "python.formatting.provider": "black",
+  "python.jediEnabled": false,
+
+  "python.linting.enabled": true,
+  "python.linting.banditEnabled": false,
+  "python.linting.flake8Enabled": false,
+  "python.linting.mypyEnabled": false,  // Use PyRight instead of MyPy.
+  "python.linting.prospectorEnabled": true,
+  "python.linting.pycodestyleEnabled": false,  // Disable PyCodeStyle since already using the Black formatter.
+  "python.linting.pydocstyleEnabled": false,  // Disable PyDocStyle since already using the Prospector linter.
+  "python.linting.pylamaEnabled": false,
+  "python.linting.pylintEnabled": false,  // Disable PyLint since already using the Prospector linter.
+
+  "python.terminal.activateEnvironment": true,
+  "python.terminal.executeInFileDir": false,
+
+  "python.testing.nosetestsEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.testing.unittestEnabled": false,
+
+  "python.workspaceSymbols.enabled": true,
+
+  "vsintellicode.python.completionsEnabled": true
+}
