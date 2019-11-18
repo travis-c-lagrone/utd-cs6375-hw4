@@ -3,6 +3,10 @@
     "src"
   ],
 
+  "ignore": [
+    "src/hw4/independent.py"
+  ],
+
   "enableTypeIgnoreComments": true,
 
   "reportCallInDefaultInitializer":    "none",
