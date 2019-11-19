@@ -1,18 +1,25 @@
 """Independent Bayesian networks."""
 
 from collections import defaultdict
-from typing import Dict, List
+from functools import reduce
+from math import log
+from operator import mul
+from typing import Dict, Tuple
 
+from numpy import array
 from numpy.core import ndarray
 from pandas import DataFrame, Series
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.multiclass import unique_labels
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 
+from ._utils import iter_rows, max_key_by_val
+
 
 class IndependentBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
-    classes_: List[int]
-    labels_by_feature_: Dict[int, List[int]]
+    classes_: Tuple[int]
+    features_: Tuple[int]
+    labels_by_feature_: Dict[int, Tuple[int]]
     probability_of_class_: Dict[int, float]
     probability_of_label_by_feature_given_class_: Dict[int, Dict[int, Dict[int, float]]]
 
@@ -20,8 +27,9 @@ class IndependentBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
         X_, y_ = check_X_y(X, y)
         n, d = X_.shape
 
-        self.classes_ = list(unique_labels(y_))
-        self.labels_by_feature_ = {f: unique_labels(X[:, f]) for f in range(d)}
+        self.classes_ = tuple(unique_labels(y_))
+        self.features_ = tuple(range(d))
+        self.labels_by_feature_ = {f: tuple(unique_labels(X_[:, f])) for f in range(d)}
         self.probability_of_class_ = {}
         self.probability_of_label_by_feature_given_class_ = {}
 
@@ -57,6 +65,37 @@ class IndependentBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
         return self
 
     def predict(self, X: ndarray) -> ndarray:
-        check_is_fitted(self, ["X_", "y_"])
+        # fmt: off
+        check_is_fitted(self, [
+            "classes_",
+            "features_",
+            "labels_by_feature_",
+            "probability_of_class_",
+            "probability_of_value_of_feature_given_class_",
+        ])
         X_ = check_array(X)
-        raise NotImplementedError()  # TODO
+        # fmt: on
+
+        preds: List[int] = []
+        for row in iter_rows(X_):
+
+            logprob_by_c: Dict[int, float] = []
+            for c in self.classes_:
+
+                factors = [self.probability_of_class_[c]]
+                for f in self.features_:
+                    l = row[f]
+                    factor = self._get_prob(c, f, l)
+                    factors.append(factor)
+
+                logs = map(log, factors)
+                logprob = reduce(mul, logs)
+                logprob_by_c[c] = logprob
+
+            max_c = max_key_by_val(logprob_by_c)
+            preds.append(max_c)
+
+        return array(preds)
+
+    def _get_prob(self, class_: int, feature: int, label: int) -> float:
+        return self.probability_of_label_by_feature_given_class_[class_][feature][label]
