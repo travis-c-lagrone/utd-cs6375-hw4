@@ -3,21 +3,17 @@
     "src"
   ],
 
-  "ignore": [
-    "src/hw4/independent.py"
-  ],
-
   "enableTypeIgnoreComments": true,
 
   "reportCallInDefaultInitializer":    "none",
-  "reportConstantRedefinition":        "error",
+  "reportConstantRedefinition":        "none",
   "reportIncompatibleMethodOverride":  "error",
   "reportInvalidStringEscapeSequence": "error",
   "reportPrivateUsage":                "error",
 
   "reportImportCycles":     "warning",
   "reportMissingImports":   "error",
-  "reportMissingTypeStubs": "warning",
+  "reportMissingTypeStubs": "none",
   "reportTypeshedErrors":   "none",
 
   "reportOptionalCall":           "error",
@@ -35,9 +31,9 @@
   "reportUnnecessaryCast":       "warning",
   "reportUnnecessaryIsInstance": "warning",
 
-  "reportUntypedBaseClass":         "warning",
-  "reportUntypedClassDecorator":    "warning",
-  "reportUntypedFunctionDecorator": "warning",
+  "reportUntypedBaseClass":         "none",
+  "reportUntypedClassDecorator":    "none",
+  "reportUntypedFunctionDecorator": "none",
   "reportUntypedNamedTuple":        "warning",
 
   "reportUnusedClass":    "warning",
