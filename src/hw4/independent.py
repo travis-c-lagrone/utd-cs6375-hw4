@@ -24,6 +24,15 @@ class IndependentBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
     probability_of_label_by_feature_given_class_: Dict[int, Dict[int, Dict[int, float]]]
 
     def fit(self, X: ndarray, y: ndarray) -> "IndependentBayesianNetworkClassifier":
+        """Train this :py:class:`IndependentBayesianNetworkClassifier`.
+
+            Args:
+                X (ndarray): A 2d array of boolean and/or categorical feature data represented as integers.
+                y (ndarray): A 1d of the class for each row in ``X``, where the class is represented as an integer.
+
+            Returns:
+                IndependentBayesianNetworkClassifier: This :py:class:`IndependentBayesianNetworkClassifier`, fit to ``X`` and ``y``.
+        """
         X_, y_ = check_X_y(X, y)
         n, d = X_.shape
 
@@ -65,6 +74,14 @@ class IndependentBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
         return self
 
     def predict(self, X: ndarray) -> ndarray:
+        """Classifies each row in ``X``.
+
+            Args:
+                X (ndarray): The 2d array of zero or more rows to classify.
+
+            Returns:
+                ndarray: A 1d array containing the predictec class for each row in ``X``.
+        """
         # fmt: off
         check_is_fitted(self, [
             "classes_",
@@ -98,4 +115,16 @@ class IndependentBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
         return array(preds)
 
     def _get_prob(self, class_: int, feature: int, label: int) -> float:
+        """Gets the smoothed probability of ``label`` of ``feature`` to occur given ``class_``.
+
+            This :py:class:`IndependentBayesianNetworkClassifier` MUST already be fitted.
+
+            Args:
+                class_ (int): The given class for which to get the probability of ``label`` of ``feature``.
+                feature (int): The feature for which to get the probability of its ``label`` given ``class_``.
+                label (int): The label of ``feature`` for which to get the probability given ``class_``.
+
+            Returns:
+                float: The smoothed probability of ``label`` of ``feature`` to occur given ``class_``.
+        """
         return self.probability_of_label_by_feature_given_class_[class_][feature][label]
