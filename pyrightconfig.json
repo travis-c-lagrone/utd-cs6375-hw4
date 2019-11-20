@@ -5,10 +5,12 @@
 
   "enableTypeIgnoreComments": true,
 
+  "reportAssertAlwaysTrue":            "warning",
   "reportCallInDefaultInitializer":    "none",
+  "reportInvalidStringEscapeSequence": "error",
+
   "reportConstantRedefinition":        "none",
   "reportIncompatibleMethodOverride":  "error",
-  "reportInvalidStringEscapeSequence": "error",
   "reportPrivateUsage":                "error",
 
   "reportImportCycles":     "warning",
@@ -23,10 +25,10 @@
   "reportOptionalOperand":        "error",
   "reportOptionalSubscript":      "error",
 
-  "reportUnknownLambdaType":    "warning",
-  "reportUnknownMemberType":    "warning",
-  "reportUnknownParameterType": "warning",
-  "reportUnknownVariableType":  "warning",
+  "reportUnknownLambdaType":    "none",
+  "reportUnknownMemberType":    "none",
+  "reportUnknownParameterType": "none",
+  "reportUnknownVariableType":  "none",
 
   "reportUnnecessaryCast":       "warning",
   "reportUnnecessaryIsInstance": "warning",
