@@ -1,9 +1,7 @@
 """Tree Bayesian networks."""
 
 from functools import reduce
-from itertools import product
 from operator import mul
-from typing import ClassVar, Dict, Final, Tuple
 
 import networkx as nx
 import numpy as np
@@ -73,10 +71,46 @@ class TreeBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
 
         return self
 
-    def predict(self, X: pd.DataFrame) -> pd.Series:  # TODO
+    def predict(self, X: pd.DataFrame) -> pd.Series:
         if set(self.features_) != set(X.columns):
             raise ValueError(
                 f"Feature sets do not match: [{self.features_}, {X.columns}]"
             )
 
         data = X.add_prefix(__class__._X_COL_PREFIX)
+
+        preds = []
+        for row in X.iterrows():
+
+            def compute_post_probs(node):
+                children_probs = []
+                for child in self.network_.successors(node):
+                    child_val = row[child]
+                    if child_val is not None:  # base case 1/2
+                        joint_probs = self.network_.edges[(node, child)]["joint_probs"]
+                        if child < node:
+                            sliced = joint_probs[child_val]
+                        else:
+                            sliced = joint_probs[:, child_val]
+                        child_probs = sliced / sliced.sum()  # normalize
+                    elif not list(self.network_.successors(child)):  # base case 2/2
+                        joint_probs = self.network_.edges[(node, child)]["joint_probs"]
+                        child_probs = joint_probs.groupby(child).sum()  # sum-out
+                    else:  # recursive case
+                        child_probs = compute_post_probs(child)  # FIXME incorrect name
+                        # TODO multiply child's posterior value probability distribution into child--node joint distribution
+                        # TODO sum-out child over node values (this results in a true ``child_prob`` as I originally used that term)
+                        raise NotImplementedError(
+                            "Recursive case of compute_post_probs(node)"
+                            " within TreeBayesianNetworkClassifier.predict(self, X)"
+                        )
+                    children_probs.append(child_probs)
+                reduced = reduce(mul, children_probs)  # NOTE assumes same order
+                normalized = reduced / reduced.sum()
+                return normalized
+
+            pred_probs = compute_post_probs(__class__._Y_COL_PREFIX)
+            pred = pred_probs.idxmax()
+            preds.append(pred)
+
+        return pd.Series(preds, index=data.index)

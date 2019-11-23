@@ -48,9 +48,7 @@
 
   "python.testing.nosetestsEnabled": false,
   "python.testing.pytestEnabled": true,
-  "python.testing.pytestArgs": [
-    "tests"
-  ],
+  "python.testing.pytestArgs": ["tests"],
   "python.testing.unittestEnabled": false,
 
   "python.workspaceSymbols.enabled": true,
