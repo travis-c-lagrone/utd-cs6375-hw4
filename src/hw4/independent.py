@@ -4,16 +4,14 @@ from collections import defaultdict
 from functools import reduce
 from math import log
 from operator import mul
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple
 
-from numpy import array
-from numpy.core import ndarray
-from pandas import DataFrame, Series
+from numpy import array, ndarray
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.multiclass import unique_labels
 from sklearn.utils.validation import check_array, check_is_fitted, check_X_y
 
-from ._utils import iter_rows, max_key_by_val
+from ._utils import iter_rows, max_key_by_val, smoothed_estimate
 
 
 class IndependentBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
@@ -53,15 +51,13 @@ class IndependentBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
                 X_c_f = X_c[:, f]
 
                 nd_f = len(self.labels_by_feature_[f])
-                n_c_smoothed = n_c + nd_f  # uses 1-Lapace smoothing
-                default_prob = 1 / n_c_smoothed  # uses 1-Lapace smoothing
-                factory = lambda dp=default_prob: dp
+                factory = lambda prob=smoothed_estimate(n_c, n, nd_f): prob
                 prob_of_label: Dict[int, float] = defaultdict(factory)
 
                 for l in self.labels_by_feature_[f]:
                     mask_c_f_v = X_c_f == l
                     n_c_f_v = sum(mask_c_f_v)
-                    prob = (n_c_f_v + 1) / n_c_smoothed  # uses 1-Lapace smoothing
+                    prob = smoothed_estimate(n_c_f_v, n_c, nd_f)
                     prob_of_label[l] = prob
 
                 prob_of_label_of_feature[f] = prob_of_label
@@ -96,7 +92,7 @@ class IndependentBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
         preds: List[int] = []
         for row in iter_rows(X_):
 
-            logprob_by_c: Dict[int, float] = []
+            logprob_by_c: Dict[int, float] = {}
             for c in self.classes_:
 
                 factors = [self.probability_of_class_[c]]

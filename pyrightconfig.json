@@ -1,23 +1,21 @@
 {
-  "include": [
+  "exclude": [
     "src"
-  ],
-
-  "ignore": [
-    "src/hw4/independent.py"
   ],
 
   "enableTypeIgnoreComments": true,
 
+  "reportAssertAlwaysTrue":            "warning",
   "reportCallInDefaultInitializer":    "none",
-  "reportConstantRedefinition":        "error",
-  "reportIncompatibleMethodOverride":  "error",
   "reportInvalidStringEscapeSequence": "error",
+
+  "reportConstantRedefinition":        "none",
+  "reportIncompatibleMethodOverride":  "error",
   "reportPrivateUsage":                "error",
 
   "reportImportCycles":     "warning",
   "reportMissingImports":   "error",
-  "reportMissingTypeStubs": "warning",
+  "reportMissingTypeStubs": "none",
   "reportTypeshedErrors":   "none",
 
   "reportOptionalCall":           "error",
@@ -27,17 +25,17 @@
   "reportOptionalOperand":        "error",
   "reportOptionalSubscript":      "error",
 
-  "reportUnknownLambdaType":    "warning",
-  "reportUnknownMemberType":    "warning",
-  "reportUnknownParameterType": "warning",
-  "reportUnknownVariableType":  "warning",
+  "reportUnknownLambdaType":    "none",
+  "reportUnknownMemberType":    "none",
+  "reportUnknownParameterType": "none",
+  "reportUnknownVariableType":  "none",
 
   "reportUnnecessaryCast":       "warning",
   "reportUnnecessaryIsInstance": "warning",
 
-  "reportUntypedBaseClass":         "warning",
-  "reportUntypedClassDecorator":    "warning",
-  "reportUntypedFunctionDecorator": "warning",
+  "reportUntypedBaseClass":         "none",
+  "reportUntypedClassDecorator":    "none",
+  "reportUntypedFunctionDecorator": "none",
   "reportUntypedNamedTuple":        "warning",
 
   "reportUnusedClass":    "warning",
