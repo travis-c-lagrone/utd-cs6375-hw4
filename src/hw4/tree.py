@@ -91,21 +91,23 @@ class TreeBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
         children_probs = []
         for child in self.network_.successors(node):
             child_val = row[child]
+            joint_probs = self.network_.edges[(node, child)]["joint_probs"]
             if child_val is not None:  # base case 1/2
-                joint_probs = self.network_.edges[(node, child)]["joint_probs"]
                 if child < node:
                     sliced = joint_probs[child_val]
                 else:
                     sliced = joint_probs[:, child_val]
                 child_probs = sliced / sliced.sum()  # normalize
             elif not list(self.network_.successors(child)):  # base case 2/2
-                joint_probs = self.network_.edges[(node, child)]["joint_probs"]
                 child_probs = joint_probs.groupby(child).sum()  # sum-out
             else:  # recursive case
-                # FIXME incorrect variable name
-                child_probs = self._compute_post_probs(row, child)
-                # TODO multiply child's posterior value probability distribution into child--node joint distribution
-                # TODO sum-out child over node values (this results in a true ``child_prob`` as I originally used that term)
+                recursed = self._compute_post_probs(row, child)  # univariate
+                merged = pd.merge(recursed, joint_probs, on=child)
+                multiplied = pd.Series(
+                    reduce(mul, [merged[col] for col in merged.columns])
+                )
+                summed = multiplied.groupby(child).sum()  # sum-out
+                child_probs = summed / summed.sum()
                 raise NotImplementedError(
                     "Recursive case of compute_post_probs(node)"
                     " within TreeBayesianNetworkClassifier.predict(self, X)"
