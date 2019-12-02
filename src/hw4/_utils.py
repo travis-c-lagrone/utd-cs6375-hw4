@@ -4,7 +4,10 @@ from typing import Any, Dict, TypeVar
 
 import networkx as nx
 import numpy as np
+<<<<<<< Updated upstream
 import pandas as pd
+=======
+>>>>>>> Stashed changes
 
 from networkx.algorithms.tree.recognition import is_tree
 from scipy import sparse
@@ -100,7 +103,7 @@ def weighted_mutual_info_score(weighted_contingency: np.ndarray) -> float:
     """A substitute for ``sklearn.metrics.mutual_info_score`` that accommodates floating-point values.
 
         The implementation of this method is almost entirely copy-pasted from Scikit-Learn v0.21.3.
-    
+
     """
     if isinstance(weighted_contingency, np.ndarray):
         # For an array
