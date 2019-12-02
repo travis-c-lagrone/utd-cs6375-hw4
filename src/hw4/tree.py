@@ -9,11 +9,11 @@ import numpy as np
 import pandas as pd
 
 from sklearn.base import BaseEstimator, ClassifierMixin
-from sklearn.metrics import mutual_info_score
-from sklearn.metrics.cluster import contingency_matrix
 from sklearn.utils.multiclass import unique_labels
 
-from ._utils import root_tree
+from ._utils import (
+    root_tree, weighted_contingency_matrix, weighted_mutual_info_score,
+)
 
 
 class TreeBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
@@ -24,12 +24,17 @@ class TreeBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
     _X_COL_PREFIX = "X_"
     _Y_COL_PREFIX = "y_"
 
-    def fit(self, X: pd.DataFrame, y: pd.Series) -> "TreeBayesianNetworkClassifier":
-        if len(X) != len(y):
-            raise ValueError(
-                "Found input variables with inconsistent number of samples: "
-                f"[{len(X)}, {len(y)}]"
-            )
+    def fit(
+        self, X: pd.DataFrame, y: pd.Series, *, weights: pd.Series = None
+    ) -> "TreeBayesianNetworkClassifier":
+        if len(X) <= 0:
+            raise ValueError(f"len(X) must be positive, but is {len(X)}")
+        if len(y) != len(X):
+            raise ValueError(f"len(y) must equal len(X), but is {len(y)}")
+        if weights is None:
+            weights = pd.Series(np.ones(len(X)))
+        if len(weights) != len(X):
+            raise ValueError(f"len(weights) must equal len(X), but is {len(weights)}")
 
         self.classes_ = unique_labels(y)
         self.features_ = np.array(X.columns)
@@ -43,7 +48,7 @@ class TreeBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
         # add nodes
         for col in data.columns:
             sr = data[col]
-            probs = sr.groupby(sr).count() / N  # groupby returns with presorted index
+            probs = weights.groupby(sr).sum() / weights.sum()
             labels = unique_labels(sr)
             G.add_node(col, probs=probs, labels=labels)
 
@@ -51,12 +56,13 @@ class TreeBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
         for i_f1 in range(len(data.columns) - 1):
             for i_f2 in range(i_f1 + 1, len(data.columns)):
                 cols = sorted([data.columns[i_f1], data.columns[i_f2]])
-                contingency = contingency_matrix(*data[cols])
-                mutual_info = mutual_info_score(None, None, contingency)
+                contingency = weighted_contingency_matrix(*data[cols], weights)
+                mutual_info = weighted_mutual_info_score(contingency)
 
                 # compute joint probability distribution
                 nd = reduce(mul, contingency.shape)  # arity of the ``*cols`` domain
-                probs = (contingency + 1) / (N + nd)  # uses 1-Laplace smoothing
+                pseudocount = contingency.sum() / nd  # for Laplace smoothing
+                probs = (contingency + pseudocount) / (N + (pseudocount * nd))  # uses Laplace smoothing
                 df = pd.DataFrame(probs)
                 df.index = G.nodes[cols[0]]["labels"]
                 df.columns = G.nodes[cols[-1]]["labels"]
