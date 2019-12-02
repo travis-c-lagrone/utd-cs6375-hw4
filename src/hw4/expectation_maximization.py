@@ -12,6 +12,7 @@ from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.metrics import mutual_info_score
 from sklearn.metrics.cluster import contingency_matrix
 from sklearn.utils.multiclass import unique_labels
+from sklearn.utils.validation import check_is_fitted
 
 from ._utils import bootstrap
 from .tree import TreeBayesianNetworkClassifier
@@ -94,3 +95,14 @@ class ExpectationMaximizationTreeBayesianNetworkClassifier(
         self.classifiers_ = clfs
         self.weights_ = clfs_weights
         return self
+
+    def predict(self, X: pd.DataFrame) -> pd.Series:
+        check_is_fitted(self, ["classifiers_", "weights_"])
+
+        df = pd.DataFrame(
+            {
+                "preds": [clf.predict(X) for clf in self.classifiers_],
+                "weights": self.weights_,
+            }
+        )
+        return df.groupby("preds")["weights"].sum().idxmax()
