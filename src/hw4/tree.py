@@ -1,5 +1,7 @@
 """Tree Bayesian networks."""
 
+import math as m
+
 from functools import reduce
 from operator import mul
 from typing import Any
@@ -10,10 +12,10 @@ import pandas as pd
 
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.utils.multiclass import unique_labels
+from sklearn.utils.validation import check_is_fitted
 
-from ._utils import (
-    root_tree, weighted_contingency_matrix, weighted_mutual_info_score,
-)
+from ._utils import (root_tree, weighted_contingency_matrix,
+                     weighted_mutual_info_score,)
 
 
 class TreeBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
@@ -23,6 +25,12 @@ class TreeBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
 
     _X_COL_PREFIX = "X_"
     _Y_COL_PREFIX = "y_"
+
+    @classmethod
+    def _compose_data(cls, X: pd.DataFrame, y: pd.Series) -> pd.DataFrame:
+        data = X.add_prefix(cls._X_COL_PREFIX)  # makes a copy
+        data[cls._Y_COL_PREFIX] = y
+        return data
 
     def fit(
         self, X: pd.DataFrame, y: pd.Series, *, weights: pd.Series = None
@@ -39,9 +47,7 @@ class TreeBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
         self.classes_ = unique_labels(y)
         self.features_ = np.array(X.columns)
 
-        data = X.add_prefix(__class__._X_COL_PREFIX)
-        data[__class__._Y_COL_PREFIX] = y
-
+        data = __class__._compose_data(X, y)
         G = nx.Graph()
         N = len(data)
 
@@ -62,7 +68,9 @@ class TreeBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
                 # compute joint probability distribution
                 nd = reduce(mul, contingency.shape)  # arity of the ``*cols`` domain
                 pseudocount = contingency.sum() / nd  # for Laplace smoothing
-                probs = (contingency + pseudocount) / (N + (pseudocount * nd))  # uses Laplace smoothing
+                probs = (contingency + pseudocount) / (
+                    N + (pseudocount * nd)
+                )  # uses Laplace smoothing
                 df = pd.DataFrame(probs)
                 df.index = G.nodes[cols[0]]["labels"]
                 df.columns = G.nodes[cols[-1]]["labels"]
@@ -78,7 +86,11 @@ class TreeBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
 
         return self
 
+    def _check_is_fitted(self) -> None:
+        check_is_fitted(self, ["classes_", "features_", "network_"])
+
     def predict(self, X: pd.DataFrame) -> pd.Series:
+        self._check_is_fitted()
         if set(self.features_) != set(X.columns):
             raise ValueError(
                 f"Feature sets do not match: [{self.features_}, {X.columns}]"
@@ -122,3 +134,27 @@ class TreeBayesianNetworkClassifier(BaseEstimator, ClassifierMixin):
         reduced = reduce(mul, children_probs)  # NOTE assumes same order
         normalized = reduced / reduced.sum()
         return normalized
+
+    def expect(self, X: pd.DataFrame, y: pd.Series) -> pd.Series:
+        self._check_is_fitted()
+
+        data = __class__._compose_data(X, y)
+        probs = data.apply(self._expect_row, axis=1)
+        return probs
+
+    def _expect_row(self, row: pd.Series) -> float:
+        """Calculates the likelihood of a data point.
+
+            Assumes that no value in ``row`` is missing.
+            Assumes that ``row`` is drawn from the result of ``__class__._compose_data(X, y)``.
+        """
+        probs = []
+        for u, v, joint_probs in self.network_.edges.data("joint_probs"):
+            cols = sorted(u, v)
+            vals = row[cols]
+            prob = joint_probs[*vals]
+            probs.append(prob)
+        log_probs = np.log(probs)
+        log_prob = np.sum(log_probs)
+        prob = m.exp(log_prob)
+        return prob
